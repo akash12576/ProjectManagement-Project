@@ -11,7 +11,7 @@ const sendEmail = async (options) => {
     })
 
     const emailTextual  = mailGenerator.generatePlaintext(options.mailgenContent)
-    const emailHtml  = mailGenerator.generatePlaintext(options.mailgenContent)
+    const emailHtml  = mailGenerator.generate(options.mailgenContent)
 
 
     const transporter = nodemailer.createTransport({

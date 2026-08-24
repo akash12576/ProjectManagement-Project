@@ -142,11 +142,42 @@ const getTaskById = asyncHandler(async(req, res) => {
 })
 
 const updateTask = asyncHandler(async(req, res) => {
-    
+  const { taskId } = req.params;
+  const { title, description, assignedTo, status} = req.body;
+  
+  const updateTask = await Task.findByIdAndUpdate(taskId, {
+    $set: {
+        ...(title && { title }),
+        ...(description && { description }),
+        ...(assignedTo && { assignedTo: new mongoose.Types.ObjectId(assignedTo) }),
+        ...(status && { status }),
+    },
+  },
+  {new: true}
+).populate("assignedTo", "avatar username fullName");
+
+ if(!updateTask){
+    throw new ApiError(404, "Task not found");
+ }
+
+ return res
+    .status(200)
+    .json(new ApiResponse(200, updateTask, "Task updated successfully"));
 })
 
 const deleteTask = asyncHandler(async(req, res) => {
-    
+    const { taskId } = req.params
+
+    const task = await Task.findByIdAndDelete(taskId);
+    if(!task){
+        throw new ApiError(404, "Task not found");
+    }
+
+    await Subtask.deleteMany({ task: new mongoose.Types.ObjectId(taskId)});
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Task and its subtasks deleted successfully"))
 })
 
 const createSubTask = asyncHandler(async(req, res) => {

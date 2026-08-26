@@ -205,11 +205,43 @@ const createSubTask = asyncHandler(async(req, res) => {
 })
 
 const updateSubTask = asyncHandler(async(req, res) => {
-    
+    const { subTaskId } = req.params
+    const { title, isCompleted } = req.body
+
+    const subTask = await Subtask.findByIdAndUpdate(
+        subTaskId,
+        {
+            $set: {
+                ...(title && {title}),
+                ...(typeof isCompleted === "boolean" && {isCompleted})
+            }
+        },
+        {new: true}
+    );
+    if(!subTask){
+        throw new ApiError(404, "Subtask not found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, subTask, "subtask updated successfully")
+        )
 })
 
 const deleteSubTask = asyncHandler(async(req, res) => {
-    
+    const {subTaskId} = req.params;
+
+    const subTask = await Subtask.findByIdAndDelete(subTaskId);
+    if(!subTask){
+        throw new ApiError(404, "Subtask not found");
+    }
+
+     return res
+        .status(200)
+        .json(
+            new ApiResponse(200, subTask, "subtask deleted successfully")
+        )
 })
 
 
